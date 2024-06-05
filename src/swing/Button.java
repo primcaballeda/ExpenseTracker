@@ -1,6 +1,8 @@
 package swing;
 
+import java.awt.Color;
 import java.awt.Cursor;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
@@ -14,6 +16,9 @@ public class Button extends JButton {
         setBorder(new EmptyBorder(10, 10, 10, 10));
         setContentAreaFilled(false);
         setCursor(new Cursor(Cursor.HAND_CURSOR));
+        setFont(new Font("Lucida Fax", Font.BOLD, 12));
+        setForeground(Color.WHITE);
+
     }
 
     @Override

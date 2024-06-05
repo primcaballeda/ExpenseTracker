@@ -32,15 +32,21 @@ public class Historypage extends javax.swing.JFrame {
 
     public Historypage() {
         initComponents();
+        
         setExtendedState(JFrame.MAXIMIZED_BOTH);
-
-        jtable.getTableHeader().setBackground(new Color(32, 106, 203));
+        
         Connect();
         login.info(next);
         showtable();
         catcmb();
         ExTableCustom();
+        
+        desc.setLineWrap(true);
+        desc.setWrapStyleWord(true);
 
+
+    }
+     void textF() {
     }
     Connection con;
     PreparedStatement smt;
@@ -98,6 +104,16 @@ public class Historypage extends javax.swing.JFrame {
         } catch (SQLException ex) {
             Logger.getLogger(Historypage.class.getName()).log(Level.SEVERE, null, ex);
         }
+    }
+
+    private String wrapDescription(String description, int lineLength) {
+        StringBuilder wrappedDescription = new StringBuilder(description);
+
+        int i = 0;
+        while (i + lineLength < wrappedDescription.length() && (i = wrappedDescription.lastIndexOf(" ", i + lineLength)) != -1) {
+            wrappedDescription.replace(i, i + 1, "\n");
+        }
+        return wrappedDescription.toString();
     }
 
     void catcmb() {
@@ -220,7 +236,7 @@ public class Historypage extends javax.swing.JFrame {
             String selectedIncomeID = (String) model.getValueAt(selectedRowIndex, 6);
 
             double amountValue = Double.parseDouble(amount.getText());
-            String description = desc.getText();
+            String description = wrapDescription(desc.getText(), 40);
             JDateChooser jDateChooser = (JDateChooser) jdate;
             java.util.Date selectedDate = jDateChooser.getDate();
             java.sql.Date sqlDate = new java.sql.Date(selectedDate.getTime());
@@ -313,7 +329,7 @@ public class Historypage extends javax.swing.JFrame {
             sumOfexpense = sumexpense.getDouble(1);
         }
 
-        double currentBalance= 0.0;
+        double currentBalance = 0.0;
 
         if (isIncome) {
             currentBalance = incomeAmount - sumOfexpense;
@@ -354,6 +370,24 @@ public class Historypage extends javax.swing.JFrame {
                     System.err.println("Unknown category type: " + categoryType);
                     return;
                 }
+                 Statement stmt = con.createStatement();
+                stmt.execute("SET FOREIGN_KEY_CHECKS = 0");
+
+                String archiveQuery = "INSERT INTO archive_table (user_id, " + idColumnName + ", CategoryType, CategoryName, Amount, Description, Date) "
+                    + "SELECT ?, " + idColumnName + ", category_table.CategoryType, CategoryName, Amount, Description, Date "
+                    + "FROM " + tableName + " "
+                    + "JOIN category_table ON " + tableName + ".CategoryID = category_table.CategoryID "
+                    + "WHERE " + idColumnName + " = ?";
+            PreparedStatement archiveStmt = con.prepareStatement(archiveQuery);
+            archiveStmt.setString(1, User_ID);
+            if ("Expense".equals(categoryType)) {
+                archiveStmt.setString(2, selectedExpenseID);
+            } else if ("Income".equals(categoryType)) {
+                archiveStmt.setString(2, selectedIncomeID);
+            }
+
+            
+
 
                 String deleteTransactionQuery = "DELETE FROM transaction_table WHERE " + idColumnName + " = ?";
                 PreparedStatement deleteTransactionStmt = con.prepareStatement(deleteTransactionQuery);
@@ -363,6 +397,9 @@ public class Historypage extends javax.swing.JFrame {
                     deleteTransactionStmt.setString(1, selectedIncomeID);
                 }
                 deleteTransactionStmt.executeUpdate();
+                
+                archiveStmt.executeUpdate();
+                
 
                 // Delete row from corresponding table
                 String deleteQuery = "DELETE FROM " + tableName + " WHERE " + idColumnName + " = ?";
@@ -373,14 +410,17 @@ public class Historypage extends javax.swing.JFrame {
                     deleteStmt.setString(1, selectedIncomeID);
                 }
                 int rowsAffected = deleteStmt.executeUpdate();
+                
+
+                stmt.execute("SET FOREIGN_KEY_CHECKS = 1");
 
                 if (rowsAffected > 0) {
                     JOptionPane.showMessageDialog(null, "Deleted!");
                     if ("Expense".equals(categoryType)) {
-                    updateBalance(con, amountValue, false);
-                } else if ("Income".equals(categoryType)) {
-                    updateBalance(con, amountValue, true);
-                }
+                        updateBalance(con, amountValue, false);
+                    } else if ("Income".equals(categoryType)) {
+                        updateBalance(con, amountValue, true);
+                    }
                 } else {
                     JOptionPane.showMessageDialog(null, "Failed to delete row");
                 }
@@ -393,10 +433,9 @@ public class Historypage extends javax.swing.JFrame {
                 JOptionPane.showMessageDialog(null, "Failed to delete row: " + ex.getMessage());
             }
         } else {
-            JOptionPane.showMessageDialog(null, "Please select a row to delete");
+           // JOptionPane.showMessageDialog(null, "Please select a row to delete");
         }
     }
-
 
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
@@ -415,8 +454,8 @@ public class Historypage extends javax.swing.JFrame {
         amount = new javax.swing.JTextField();
         IncomeID = new javax.swing.JTextField();
         expenseID = new javax.swing.JTextField();
-        jScrollPane2 = new javax.swing.JScrollPane();
-        desc = new javax.swing.JTextPane();
+        jScrollPane3 = new javax.swing.JScrollPane();
+        desc = new javax.swing.JTextArea();
         jPanel2 = new javax.swing.JPanel();
         jLabel8 = new javax.swing.JLabel();
         jScrollPane1 = new javax.swing.JScrollPane();
@@ -452,7 +491,7 @@ public class Historypage extends javax.swing.JFrame {
         jdate.setBorder(new javax.swing.border.LineBorder(new java.awt.Color(244, 168, 185), 2, true));
         jdate.setForeground(new java.awt.Color(255, 224, 224));
 
-        button1.setBackground(new java.awt.Color(244, 198, 214));
+        button1.setBackground(new java.awt.Color(173, 128, 171));
         button1.setBorder(null);
         button1.setText("Delete");
         button1.addActionListener(new java.awt.event.ActionListener() {
@@ -461,7 +500,7 @@ public class Historypage extends javax.swing.JFrame {
             }
         });
 
-        button2.setBackground(new java.awt.Color(244, 198, 214));
+        button2.setBackground(new java.awt.Color(173, 128, 171));
         button2.setBorder(null);
         button2.setText("Homepage");
         button2.addActionListener(new java.awt.event.ActionListener() {
@@ -470,7 +509,7 @@ public class Historypage extends javax.swing.JFrame {
             }
         });
 
-        updatebtn.setBackground(new java.awt.Color(244, 198, 214));
+        updatebtn.setBackground(new java.awt.Color(173, 128, 171));
         updatebtn.setBorder(null);
         updatebtn.setText("Update");
         updatebtn.addActionListener(new java.awt.event.ActionListener() {
@@ -483,6 +522,11 @@ public class Historypage extends javax.swing.JFrame {
         amount.setForeground(new java.awt.Color(173, 85, 146));
         amount.setBorder(new javax.swing.border.LineBorder(new java.awt.Color(244, 168, 185), 3, true));
         amount.setCaretColor(new java.awt.Color(255, 0, 204));
+        amount.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                amountActionPerformed(evt);
+            }
+        });
 
         IncomeID.setEditable(false);
         IncomeID.setBackground(new java.awt.Color(255, 224, 224));
@@ -507,49 +551,61 @@ public class Historypage extends javax.swing.JFrame {
         expenseID.setEnabled(false);
         expenseID.setOpaque(true);
 
+        desc.setColumns(20);
+        desc.setForeground(new java.awt.Color(173, 85, 146));
+        desc.setRows(5);
         desc.setBorder(new javax.swing.border.LineBorder(new java.awt.Color(244, 168, 185), 2, true));
-        jScrollPane2.setViewportView(desc);
+        jScrollPane3.setViewportView(desc);
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                        .addGroup(jPanel1Layout.createSequentialGroup()
+                            .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(expenseID, javax.swing.GroupLayout.PREFERRED_SIZE, 0, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addGap(240, 240, 240)
+                            .addComponent(IncomeID, javax.swing.GroupLayout.PREFERRED_SIZE, 0, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGroup(jPanel1Layout.createSequentialGroup()
+                            .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                .addGroup(jPanel1Layout.createSequentialGroup()
+                                    .addGap(25, 25, 25)
+                                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                        .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, 138, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 186, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 102, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                .addGroup(jPanel1Layout.createSequentialGroup()
+                                    .addGap(80, 80, 80)
+                                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                                        .addComponent(button1, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                        .addComponent(button2, javax.swing.GroupLayout.DEFAULT_SIZE, 200, Short.MAX_VALUE)
+                                        .addComponent(updatebtn, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
+                            .addGap(103, 103, 103)))
                     .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addGap(80, 80, 80)
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                            .addComponent(button1, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(button2, javax.swing.GroupLayout.DEFAULT_SIZE, 200, Short.MAX_VALUE)
-                            .addComponent(updatebtn, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                        .addGap(33, 33, 33)
+                        .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 138, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addGap(25, 25, 25)
+                        .addGap(98, 98, 98)
+                        .addComponent(jdate, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(jPanel1Layout.createSequentialGroup()
-                                .addGap(58, 58, 58)
-                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                                    .addComponent(jdate, javax.swing.GroupLayout.PREFERRED_SIZE, 182, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(category, javax.swing.GroupLayout.PREFERRED_SIZE, 188, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(amount, javax.swing.GroupLayout.PREFERRED_SIZE, 184, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 181, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 102, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, 138, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 138, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 186, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                .addGap(60, 60, 60))))
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addContainerGap(40, Short.MAX_VALUE)
-                        .addComponent(expenseID, javax.swing.GroupLayout.PREFERRED_SIZE, 0, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(240, 240, 240)
-                        .addComponent(IncomeID, javax.swing.GroupLayout.PREFERRED_SIZE, 0, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addGap(59, 59, 59))
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                                .addComponent(amount)
+                                .addComponent(jScrollPane3))
+                            .addComponent(category, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 213, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                .addGap(80, 80, 80))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
-                .addGap(39, 39, 39)
+                .addGap(27, 27, 27)
                 .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(category, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -559,13 +615,13 @@ public class Historypage extends javax.swing.JFrame {
                 .addComponent(amount, javax.swing.GroupLayout.PREFERRED_SIZE, 47, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 77, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGap(3, 3, 3)
+                .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jdate, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 34, Short.MAX_VALUE)
+                .addGap(18, 18, 18)
+                .addComponent(jdate, javax.swing.GroupLayout.PREFERRED_SIZE, 38, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 170, Short.MAX_VALUE)
                 .addComponent(IncomeID, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
                 .addComponent(expenseID, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -605,24 +661,27 @@ public class Historypage extends javax.swing.JFrame {
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 782, Short.MAX_VALUE)
-            .addGroup(jPanel2Layout.createSequentialGroup()
-                .addGap(25, 25, 25)
-                .addComponent(jLabel2)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jLabel8)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
+                .addGap(0, 0, 0)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addGap(19, 19, 19)
+                        .addComponent(jLabel2)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jLabel8)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 260, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.TRAILING))
+                .addContainerGap())
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addGroup(jPanel2Layout.createSequentialGroup()
+                .addGap(82, 82, 82)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jLabel2, javax.swing.GroupLayout.Alignment.TRAILING)
                     .addComponent(jLabel8, javax.swing.GroupLayout.Alignment.TRAILING))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 559, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(15, 15, 15))
+                .addComponent(jScrollPane1))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -652,7 +711,7 @@ public class Historypage extends javax.swing.JFrame {
     private void button2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_button2ActionPerformed
         // TODO add your handling code here:
 
-        new ET_Homepage().setVisible(true);
+        new ET_Home().setVisible(true);
         this.dispose();
     }//GEN-LAST:event_button2ActionPerformed
 
@@ -666,6 +725,10 @@ public class Historypage extends javax.swing.JFrame {
     private void IncomeIDActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_IncomeIDActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_IncomeIDActionPerformed
+
+    private void amountActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_amountActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_amountActionPerformed
 
     /**
      * @param args the command line arguments
@@ -709,7 +772,7 @@ public class Historypage extends javax.swing.JFrame {
     private swing.Button button1;
     private swing.Button button2;
     private javax.swing.JComboBox<String> category;
-    private javax.swing.JTextPane desc;
+    private javax.swing.JTextArea desc;
     private javax.swing.JTextField expenseID;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
@@ -720,7 +783,7 @@ public class Historypage extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JScrollPane jScrollPane3;
     private com.toedter.calendar.JDateChooser jdate;
     private javax.swing.JTable jtable;
     private swing.Button updatebtn;

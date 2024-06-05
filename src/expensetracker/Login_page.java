@@ -2,7 +2,6 @@ package expensetracker;
 
 
 import expensetracker.info;
-import expensetracker.ET_Homepage;
 import java.sql.*;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
@@ -60,7 +59,7 @@ public class Login_page extends javax.swing.JFrame {
                 int userID = rs.getInt("UserID");
                 if (username.equals(un) && password.equals(pwd)) {
                     info.setUser_id(Integer.toString(userID));
-                    new ET_Homepage().setVisible(true);
+                    new ET_Home().setVisible(true);
                     this.setVisible(false);
                     
         con.close();
@@ -83,14 +82,14 @@ public class Login_page extends javax.swing.JFrame {
         jPanel1 = new javax.swing.JPanel();
         jPanel2 = new javax.swing.JPanel();
         jLabel11 = new javax.swing.JLabel();
+        jLabel9 = new javax.swing.JLabel();
+        jLabel10 = new javax.swing.JLabel();
         jPanel3 = new javax.swing.JPanel();
         jLabel6 = new javax.swing.JLabel();
         jLabel7 = new javax.swing.JLabel();
         usern = new javax.swing.JTextField();
         jLabel8 = new javax.swing.JLabel();
         pass = new javax.swing.JPasswordField();
-        jLabel10 = new javax.swing.JLabel();
-        jLabel9 = new javax.swing.JLabel();
         showpass = new javax.swing.JCheckBox();
         button1 = new swing.Button();
         jLabel1 = new javax.swing.JLabel();
@@ -105,6 +104,19 @@ public class Login_page extends javax.swing.JFrame {
 
         jLabel11.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/Screenshot 2024-05-16 155711.png"))); // NOI18N
 
+        jLabel9.setFont(new java.awt.Font("Lucida Fax", 0, 14)); // NOI18N
+        jLabel9.setForeground(new java.awt.Color(173, 85, 146));
+        jLabel9.setText("No Account? ");
+
+        jLabel10.setFont(new java.awt.Font("Lucida Fax", 1, 14)); // NOI18N
+        jLabel10.setForeground(new java.awt.Color(173, 85, 146));
+        jLabel10.setText("Click Here!");
+        jLabel10.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jLabel10MouseClicked(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
@@ -112,13 +124,23 @@ public class Login_page extends javax.swing.JFrame {
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addComponent(jLabel11, javax.swing.GroupLayout.PREFERRED_SIZE, 402, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(0, 21, Short.MAX_VALUE))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(jLabel9)
+                .addGap(0, 0, 0)
+                .addComponent(jLabel10, javax.swing.GroupLayout.PREFERRED_SIZE, 93, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(114, 114, 114))
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
                 .addContainerGap(167, Short.MAX_VALUE)
                 .addComponent(jLabel11, javax.swing.GroupLayout.PREFERRED_SIZE, 128, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(143, 143, 143))
+                .addGap(111, 111, 111)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel9)
+                    .addComponent(jLabel10))
+                .addGap(15, 15, 15))
         );
 
         jPanel1.add(jPanel2, java.awt.BorderLayout.CENTER);
@@ -147,19 +169,6 @@ public class Login_page extends javax.swing.JFrame {
         pass.setForeground(new java.awt.Color(173, 85, 146));
         pass.setBorder(new javax.swing.border.LineBorder(new java.awt.Color(255, 206, 232), 2, true));
 
-        jLabel10.setFont(new java.awt.Font("Lucida Fax", 1, 14)); // NOI18N
-        jLabel10.setForeground(new java.awt.Color(173, 128, 171));
-        jLabel10.setText("Click Here!");
-        jLabel10.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseClicked(java.awt.event.MouseEvent evt) {
-                jLabel10MouseClicked(evt);
-            }
-        });
-
-        jLabel9.setFont(new java.awt.Font("Lucida Fax", 0, 14)); // NOI18N
-        jLabel9.setForeground(new java.awt.Color(173, 128, 171));
-        jLabel9.setText("No Account? ");
-
         showpass.setBackground(new java.awt.Color(255, 255, 255));
         showpass.setForeground(new java.awt.Color(173, 128, 171));
         showpass.setText("Show Password");
@@ -169,7 +178,7 @@ public class Login_page extends javax.swing.JFrame {
             }
         });
 
-        button1.setBackground(new java.awt.Color(255, 224, 224));
+        button1.setBackground(new java.awt.Color(173, 85, 146));
         button1.setText("Login");
         button1.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -207,12 +216,7 @@ public class Login_page extends javax.swing.JFrame {
                             .addComponent(showpass))
                         .addGap(61, 61, 61))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel3Layout.createSequentialGroup()
-                        .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(button1, javax.swing.GroupLayout.PREFERRED_SIZE, 179, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addGroup(jPanel3Layout.createSequentialGroup()
-                                .addComponent(jLabel9)
-                                .addGap(0, 0, 0)
-                                .addComponent(jLabel10, javax.swing.GroupLayout.PREFERRED_SIZE, 93, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addComponent(button1, javax.swing.GroupLayout.PREFERRED_SIZE, 179, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(99, 99, 99))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel3Layout.createSequentialGroup()
                         .addComponent(jLabel1)
@@ -237,11 +241,7 @@ public class Login_page extends javax.swing.JFrame {
                 .addComponent(showpass)
                 .addGap(18, 18, 18)
                 .addComponent(button1, javax.swing.GroupLayout.DEFAULT_SIZE, 48, Short.MAX_VALUE)
-                .addGap(18, 18, 18)
-                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel9)
-                    .addComponent(jLabel10))
-                .addGap(18, 18, 18))
+                .addGap(53, 53, 53))
         );
 
         getContentPane().add(jPanel3);

@@ -31,6 +31,7 @@ public class StartingScreen extends javax.swing.JFrame {
         button1 = new swing.Button();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setTitle("Omniflux\n");
         setResizable(false);
 
         jPanel1.setBackground(new java.awt.Color(254, 224, 224));
